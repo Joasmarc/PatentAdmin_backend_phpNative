@@ -2,6 +2,7 @@
 require_once "../config/connection.php";
 
 class Person extends Connection {
+
     public static function selectAll(){
         try {
             $sql = 'SELECT person.value_id, person.name, person.last_name, sex.name as sex, type_id.name as type_id
@@ -14,7 +15,7 @@ class Person extends Connection {
             $result = $stmt->fetchAll();
             return $result;
         } catch (PDOException $th) {
-            echo $th->getMessage();
+            return $th->getMessage();
         }
     }
 
@@ -31,7 +32,7 @@ class Person extends Connection {
             $result = $stmt->fetch();
             return $result;
         } catch (PDOException $th) {
-            echo $th->getMessage();
+            return $th->getMessage();
         }
     }
 
@@ -48,15 +49,15 @@ class Person extends Connection {
             $result = $stmt->fetch();
             return $result;
         } catch (PDOException $th) {
-            echo $th->getMessage();
+            return $th->getMessage();
         }
     }
 
     public static function updatePerson($person){
         try {
-            $sql = "UPDATE person SET type_id = :type_id, value_id = :value_id, name = :name, last_name = :last_name, sex = :sex";
+            $sql = "UPDATE person SET name = :name, last_name = :last_name, sex = :sex
+            WHERE value_id = :value_id";
             $stmt = Connection::getConnection()->prepare($sql);
-            $stmt->bindParam(':type_id', $person['type_id']);
             $stmt->bindParam(':value_id', $person['value_id']);
             $stmt->bindParam(':name', $person['name']);
             $stmt->bindParam(':last_name', $person['last_name']);
@@ -71,14 +72,14 @@ class Person extends Connection {
 
     public static function deleteById($id){
         try {
-            $sql = "DELETE FROM person WHERE id = :id";
+            $sql = "DELETE FROM person WHERE value_id = :id";
             $stmt = Connection::getConnection()->prepare($sql);
             $stmt->bindParam(':id', $id);
             $stmt->execute();
             $result = $stmt->fetch();
             return $result;
         } catch (PDOException $th) {
-            echo $th->getMessage();
+            return $th->getMessage();
         }
     }
 }

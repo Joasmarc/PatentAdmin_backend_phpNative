@@ -2,6 +2,7 @@
 // imports
 require_once '../models/Person.model.php';
 require_once "../utils/utils.php";
+require_once "../utils/dataValidator.php";
 
 // config http
 header("Content-type: appiclation/json");
@@ -15,10 +16,11 @@ if ($request_method === 'GET'){
 
             case 'findAll':
 
+                // execute consult
                 $persons = Person::selectAll();
 
+                // prepare and response
                 if ($persons){
-                    // prepare
                     $response = array();
                     foreach ($persons as $value) {
                         $response[] = [
@@ -29,7 +31,6 @@ if ($request_method === 'GET'){
                             'type_id'=> $value['type_id'],
                         ];
                     }
-                    // execute
                     http_response_code(200);
                     exit(json_encode(['data' => $response]));
                 } else {
@@ -40,13 +41,14 @@ if ($request_method === 'GET'){
                 break;
             
             case 'findId':
+
                 if(isset($_GET['id'])){
 
+                    // execute consult
                     $persons = Person::selectById($_GET['id']);
 
-                    //validate query result
+                    // prepare and response
                     if($persons){
-                        // prepare
                         $response[] = [
                             'id' => $persons['value_id'],
                             'name'=> $persons['name'],
@@ -54,7 +56,6 @@ if ($request_method === 'GET'){
                             'sex'=> $persons['sex'],
                             'type_id'=> $persons['type_id'],
                         ];
-                        // execute
                         http_response_code(200);
                         exit(json_encode(['data' => $response]));
                     } else {
@@ -63,30 +64,112 @@ if ($request_method === 'GET'){
                     }
                 } else {
                     http_response_code(400);
-                    exit(json_encode(['msg' => 'parameter `id` empty']));
+                    exit(json_encode(['warning' => 'parameter `id` empty']));
+                }
+                break;
+
+            case 'delete':
+                if(isset($_GET['id'])){
+
+                    // execute and response
+                    if(empty($error = Person::deleteById($_GET['id']))){
+                        http_response_code(200);
+                        exit(json_encode(['data' => true]));
+                    } else {
+                        http_response_code(400);
+                        exit(json_encode(['error' => $error]));
+                    }
+                    exit(var_dump($result));
+                } else {
+                    http_response_code(400);
+                    exit(json_encode(['warning' => 'parameter `id` empty']));
                 }
                 break;
             
             default:
                 http_response_code(400);
-                exit(json_encode(['msg' => 'bad request']));
+                exit(json_encode(['error' => 'bad request']));
                 break;
         }
     }
 
 } else if ($request_method === 'POST'){
-    switch ($_GET['request']) {
-        case 'create':
-            $request = requestJSON();
-            //validate
+    if (isset($_GET['request'])){
+        switch ($_GET['request']) {
+    
+            case 'create':
+    
+                $request = requestJSON();
+                
+                // validate request
+                $validation = array();
+                $validation[] = [$request['id'],        "id",        "str"];
+                $validation[] = [$request['type_id'],   "type_id",   "int"];
+                $validation[] = [$request['name'],      "name",      "str"];
+                $validation[] = [$request['last_name'], "last_name", "str"];
+                $validation[] = [$request['sex'],       "sex",       "int"];
 
-            exit(json_encode(['data' => $request    ]));
-            break;
-        
-        default:
-            # code...
-            break;
+                if (!empty($error = validationData($validation))) {
+                    exit(json_encode(['error' => $error]));
+                }
+    
+                // prepare for database
+                $person_data = [
+                    'value_id' => $request['id'],
+                    'type_id' => $request['type_id'],
+                    'name' => $request['name'],
+                    'last_name' => $request['last_name'],
+                    'sex' => $request['sex'],
+                ];
+    
+                // execute and response
+                if(empty($error = Person::insertPerson($person_data))){
+                    http_response_code(200);
+                    exit(json_encode(['data' => true]));
+                } else {
+                    http_response_code(400);
+                    exit(json_encode(['error' => $error]));
+                }
+    
+                break;
+            
+            case 'update':
+                $request = requestJSON();
+
+                // validate request
+                $validation = array();
+                $validation[] = [$request['id'],        "id",        "str"];
+                $validation[] = [$request['name'],      "name",      "str"];
+                $validation[] = [$request['last_name'], "last_name", "str"];
+                $validation[] = [$request['sex'],       "sex",       "int"];
+
+                if (!empty($error = validationData($validation))) {
+                    exit(json_encode(['error' => $error]));
+                }
+
+                // prepare for database
+                $person_data = [
+                    'value_id' => $request['id'],
+                    'name' => $request['name'],
+                    'last_name' => $request['last_name'],
+                    'sex' => $request['sex'],
+                ];
+
+                // execute and response
+                if(empty($error = Person::updatePerson($person_data))){
+                    http_response_code(200);
+                    exit(json_encode(['data' => true]));
+                } else {
+                    http_response_code(400);
+                    exit(json_encode(['error' => $error]));
+                }
+
+                break;
+            
+            default:
+                http_response_code(400);
+                exit(json_encode(['error' => 'bad request']));
+                break;
+        }
     }
 }
-
-// echo json_encode(Person::selectAll());
