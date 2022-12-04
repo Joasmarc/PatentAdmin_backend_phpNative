@@ -1,5 +1,5 @@
 CREATE TABLE person (
-    value_id VARCHAR(155) NOT NULL,
+    value_id VARCHAR(155) NOT NULL UNIQUE,
     type_id VARCHAR(2) NOT NULL,
     name VARCHAR(55) NOT NULL,
     last_name VARCHAR(55) NOT NULL,

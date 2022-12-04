@@ -39,7 +39,7 @@ if ($request_method === 'GET'){
                     exit(json_encode(['data' => $response]));
                 } else {
                     http_response_code(404);
-                    exit(json_encode(['data' => null]));
+                    exit(json_encode(['data' => []]));
                 }
                 
                 break;
@@ -115,13 +115,19 @@ if ($request_method === 'GET'){
                 // execute consult
                 $sex = Person::getSextype();
 
+                $traslate = [
+                    "female" => "Femenina",
+                    "male" => "Masculino",
+                    "other" => "Otros",
+                ];
+
                 // prepare and response
                 if ($sex){
                     $response = array();
                     foreach ($sex as $value) {
                         $response[] = [
                             'id' => $value['id'],
-                            'name'=> $value['name'],
+                            'name'=> $traslate[$value['name']],
                         ];
                     }
                     http_response_code(200);
