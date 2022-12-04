@@ -82,4 +82,28 @@ class Person extends Connection {
             return $th->getMessage();
         }
     }
+
+    public static function getIdType(){
+        try {
+            $sql = 'SELECT * FROM type_id';
+            $stmt = Connection::getConnection()->prepare($sql);
+            $stmt->execute();
+            $result = $stmt->fetchAll();
+            return $result;
+        } catch (PDOException $th) {
+            return $th->getMessage();
+        }
+    }
+
+    public static function getSextype(){
+        try {
+            $sql = 'SELECT * FROM sex';
+            $stmt = Connection::getConnection()->prepare($sql);
+            $stmt->execute();
+            $result = $stmt->fetchAll();
+            return $result;
+        } catch (PDOException $th) {
+            return $th->getMessage();
+        }
+    }
 }

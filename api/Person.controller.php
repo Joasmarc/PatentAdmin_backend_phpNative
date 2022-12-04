@@ -6,6 +6,10 @@ require_once "../utils/dataValidator.php";
 
 // config http
 header("Content-type: appiclation/json");
+// cors
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: *");
+header('Access-Control-Allow-Credentials: true');
 $request_method = $_SERVER['REQUEST_METHOD'];
 
 // responses
@@ -83,6 +87,48 @@ if ($request_method === 'GET'){
                 } else {
                     http_response_code(400);
                     exit(json_encode(['warning' => 'parameter `id` empty']));
+                }
+                break;
+            case 'typeId':
+                // execute consult
+                $type_id = Person::getIdType();
+
+                // prepare and response
+                if ($type_id){
+                    $response = array();
+                    foreach ($type_id as $value) {
+                        $response[] = [
+                            'id' => $value['id'],
+                            'name'=> $value['name'],
+                        ];
+                    }
+                    http_response_code(200);
+                    exit(json_encode(['data' => $response]));
+                } else {
+                    http_response_code(404);
+                    exit(json_encode(['data' => null]));
+                }
+
+                break;
+            
+            case 'sex':
+                // execute consult
+                $sex = Person::getSextype();
+
+                // prepare and response
+                if ($sex){
+                    $response = array();
+                    foreach ($sex as $value) {
+                        $response[] = [
+                            'id' => $value['id'],
+                            'name'=> $value['name'],
+                        ];
+                    }
+                    http_response_code(200);
+                    exit(json_encode(['data' => $response]));
+                } else {
+                    http_response_code(404);
+                    exit(json_encode(['data' => null]));
                 }
                 break;
             
